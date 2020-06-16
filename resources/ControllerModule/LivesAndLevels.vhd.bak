@@ -1,0 +1,57 @@
+LIBRARY IEEE;
+USE  IEEE.STD_LOGIC_1164.all;
+USE  IEEE.STD_LOGIC_UNSIGNED.all;
+use ieee.numeric_std.all;
+
+ENTITY pipeDrawer IS
+	PORT(
+		vsync		: in std_logic;
+		state		: in std_logic_vector(2 DOWNTO 0);
+		speedVal : out integer range 0 to 10;
+		lives		: out std_logic_vector(1 DOWNTO 0);
+		level		: out  std_logic_vector(1 DOWNTO 0);
+		win  		: out std_logic;
+		lose 		: out std_logic;
+	);
+END ENTITY pipeDrawer;
+
+architecture drawBehaviour OF pipeDrawer IS
+	
+begin
+	
+	--vertSync
+	vert : PROCESS(vertSync)
+	variable prevVert : STD_LOGIC := '0';
+	variable count : integer range 0 to 700 := 0;
+	variable vSpeed : integer range 0 to 10 := 0;
+	variable vLives : std_logic_vector(1 DOWNTO 0);
+	variable vLevel : std_logic_vector(2 DOWNTO 0);
+	variable vWin, vLose : std_logic;
+	BEGIn
+		IF rising_edge(vertSync) THEN
+			if state = "000" or state = "100" or state = "101" then
+				vSpeed := 0;
+				vLives := "11";
+				vLevel := "000";
+			else
+				null;
+			end if;
+		
+			if state = "010" then
+				if count >= 600 then
+					count := 0;
+					vSpeed := vSpeed + 1;
+					vLevel := vLevel + 1;
+				else
+					count := count + 1;
+				end if;
+			else
+				null;
+			end if;
+			
+			speedVal <= vspeed;
+			level <= vLevel;
+		END IF;
+	
+	END PROCESS vert;
+end architecture drawBehaviour;

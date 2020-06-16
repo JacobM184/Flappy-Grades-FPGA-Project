@@ -1,0 +1,30 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.all;
+USE  IEEE.STD_LOGIC_ARITH.all;
+USE  IEEE.STD_LOGIC_SIGNED.all;
+
+ENTITY menuSelect IS
+
+	PORT(
+		selected                                                                         : IN integer range 0 to 10;
+		title_1, title_2, title_3, title_4, options_1, options_2, options_3, options_4  	: IN std_logic;
+		title, option								                                             : OUT std_logic
+	);
+END ENTITY menuSelect;
+
+architecture behaviour of menuSelect is
+	BEGIN
+	
+	title  <= title_1 when selected <= 1 else
+	          title_2 when selected <= 2 else
+				 title_3 when selected <= 3 else
+			  	 title_4 when selected <= 4 else
+				 '0';
+				
+	option <= options_1 when selected <= 1 else
+	          options_2 when selected <= 2 else
+				 options_3 when selected <= 3 else
+			  	 options_4 when selected <= 4 else
+				 '0';
+				 
+END architecture behaviour;

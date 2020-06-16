@@ -1,0 +1,94 @@
+library ieee;
+use  ieee.std_logic_1164.all;
+use  ieee.std_logic_arith.all;
+use  ieee.std_logic_unsigned.all;
+
+
+entity pipePhysics is
+	generic(SCROLLSPEED : signed(2 downto 0) := conv_signed(1, 11);-- change vector size if necessary);
+			STARTROW: signed(10 downto 0) := conv_signed(250, 11)); -- gap starting position); 
+	port(v_sync, Reset, Pause, Resume : in std_logic;
+		 rowOut, colOut : out signed(10 downto 0));
+end entity pipePhysics;
+
+architecture behaviour of pipePhysics is
+
+	constant UPPERLIM : signed(10 downto 0) := conv_signed(160, 11); -- upper limit for bottom pipe's top
+	constant LOWERLIM : signed(10 downto 0) := conv_signed(360, 11); -- lower limit for bottom pipe's top
+	constant STARTDIR : std_logic := '0';
+	
+	--placeholder signals for row and column of bottom pipe's top right corner
+	signal col : signed(10 downto 0) := conv_signed(639, 11);
+	signal row : signed(10 downto 0) := STARTROW;
+	
+begin
+	
+	-- process for motion of the pipes
+	process(v_sync)
+		variable down : std_logic := STARTDIR; -- dictates direction of gap movement
+		variable moveActive : std_logic := '1'; -- dictates when gap position changes
+		variable stop : std_logic := '0';
+	begin
+		if(rising_edge(v_sync)) then
+		
+			-- Pause/Resume code
+			if((Pause = '1') and (Resume = '0')) then
+				stop := '1';
+			elsif ((Pause = '0') and (Resume = '1')) then
+				stop := '0';
+			else
+				null;
+			end if;
+		
+			-- logic for moving gap between pillars
+			-- when below upper limit
+			if((row > UPPERLIM) and (down = '0') and (moveActive = '0') and (stop = '0')) then
+				row <= row - 20;
+				moveActive := '1';
+			-- when above lower limit
+			elsif((row < LOWERLIM) and (down = '1') and (moveActive = '0') and (stop = '0')) then
+				row <= row + 20;
+				moveActive := '1';
+			-- when pipe is moving
+			elsif(moveActive = '1') then
+				row <= row;
+			-- when below lower limit
+			elsif((row >= LOWERLIM) and (moveActive = '0') and (stop = '0')) then
+				down := '0';
+				row <= row - 20;
+				moveActive := '1';
+			-- when above upper limit
+			elsif((row <= UPPERLIM) and (moveActive = '0') and (stop = '0')) then
+				down := '1';
+				row <= row + 10;
+				moveActive := '1';
+			else
+				null;	
+			end if;
+		
+		
+			-- logic for moving pipe across the screen
+			-- when pipe has not reached left end of screen
+			if((moveActive = '1') and (col > 0) and (Reset = '0') and (stop = '0')) then
+				col <= col - SCROLLSPEED;
+			-- when pipe has reached left end of screen
+			elsif((moveActive = '1') and (col < 1) and (Reset = '0') and (stop = '0')) then
+				moveActive := '0';
+				col <= conv_signed(639, 11);
+				
+			elsif (Reset = '1') then
+				col <= conv_signed(639, 11);
+				row <= STARTROW;
+			else
+				null;
+			end if;
+		else
+			null;
+		end if;	
+	end process;
+	
+	-- set outputs [put these before the "end process;" if need be]
+	rowOut <= row;
+	colOut <= col;
+	
+end architecture behaviour;

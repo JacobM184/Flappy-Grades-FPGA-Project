@@ -1,0 +1,120 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE IEEE.STD_LOGIC_ARITH.all;
+USE IEEE.STD_LOGIC_UNSIGNED.all;
+
+LIBRARY altera_mf;
+USE altera_mf.all;
+
+ENTITY birdDrawerV2 IS
+	GENERIC(
+		BIRD_SIZE 	: integer range 0 to 32 := 32;
+		BIRD_X		: integer range 0 to 200 := 100
+	);
+
+	PORT
+	(
+		clk, vertSync					: 	IN STD_LOGIC ;
+		bird_pos							: 	IN SIGNED(10 DOWNTO 0);
+		pixel_row,pixel_col			: 	IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+		R, G, B							:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		A									: 	OUT STD_LOGIC
+	);
+END birdDrawerV2;
+
+
+ARCHITECTURE SYN OF birdDrawerV2 IS
+
+	SIGNAL rom_data		: STD_LOGIC_VECTOR (11 DOWNTO 0);
+	SIGNAL rom_address	: STD_LOGIC_VECTOR (9 DOWNTO 0);
+	SIGNAL prev_bird_pos : SIGNED(10 DOWNTO 0);
+	SIGNAL sA				: STD_LOGIC;
+
+	COMPONENT altsyncram
+	GENERIC (
+		address_aclr_a			: STRING;
+		clock_enable_input_a	: STRING;
+		clock_enable_output_a	: STRING;
+		init_file				: STRING;
+		intended_device_family	: STRING;
+		lpm_hint				: STRING;
+		lpm_type				: STRING;
+		numwords_a				: NATURAL;
+		operation_mode			: STRING;
+		outdata_aclr_a			: STRING;
+		outdata_reg_a			: STRING;
+		widthad_a				: NATURAL;
+		width_a					: NATURAL;
+		width_byteena_a			: NATURAL
+	);
+	PORT (
+		clock0		: IN STD_LOGIC ;
+		address_a	: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
+		q_a			: OUT STD_LOGIC_VECTOR (11 DOWNTO 0)
+	);
+	END COMPONENT;
+
+BEGIN
+
+	altsyncram_component : altsyncram
+	GENERIC MAP (
+		address_aclr_a => "NONE",
+		clock_enable_input_a => "BYPASS",
+		clock_enable_output_a => "BYPASS",
+		init_file => "pictureRAM.mif",
+		intended_device_family => "Cyclone III",
+		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
+		lpm_type => "altsyncram",
+		numwords_a => 1024,
+		operation_mode => "ROM",
+		outdata_aclr_a => "NONE",
+		outdata_reg_a => "UNREGISTERED",
+		widthad_a => 10,
+		width_a => 12,
+		width_byteena_a => 1
+	)
+	PORT MAP (
+		clock0 => clk,
+		address_a => rom_address,
+		q_a => rom_data
+	);
+
+	R <= rom_data(3 DOWNTO 0);
+	G <= rom_data(7 DOWNTO 4);
+	B <= rom_data(11 DOWNTO 8);
+	
+	A <= 	'0' when sA = '0' or rom_data = "111100000000" else
+			'1';
+	
+	PROCESS(clk, rom_data)
+	variable prevState 		: STD_LOGIC := '0';
+	variable v_rom_address	: STD_LOGIC_VECTOR (9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(0, 10);
+	BEGIN
+		IF rising_edge(clk) THEN
+			IF pixel_col >= '0' & CONV_STD_LOGIC_VECTOR(BIRD_X, 10) and pixel_col < '0' & CONV_STD_LOGIC_VECTOR(BIRD_X + BIRD_SIZE, 10) and
+				pixel_row >= '0' & CONV_STD_LOGIC_VECTOR(prev_bird_pos, 10) and pixel_row < '0' & CONV_STD_LOGIC_VECTOR(prev_bird_pos + BIRD_SIZE, 10) THEN
+				sA <= '1';
+				rom_address <= v_rom_address;
+				v_rom_address := v_rom_address + CONV_STD_LOGIC_VECTOR(1, 10);
+			ELSE
+				sA <= '0';
+			END IF;
+		ELSE
+		 null;
+		END IF;
+	END PROCESS;
+	
+	vert : PROCESS(clk)
+	variable prevVert : STD_LOGIC := '0';
+	BEGIn
+		IF rising_edge(clk) THEN
+			IF prevVert /= vertSync THEN
+				prevVert := vertSync;
+				prev_bird_pos <= bird_pos;
+			ELSE
+				prevVert := vertSync;
+			END IF;
+		END IF;
+	
+	END PROCESS vert;
+END SYN;

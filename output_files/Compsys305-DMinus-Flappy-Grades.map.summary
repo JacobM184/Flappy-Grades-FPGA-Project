@@ -1,0 +1,14 @@
+Analysis & Synthesis Status : Successful - Fri Jun 05 07:54:12 2020
+Quartus II 64-Bit Version : 13.0.0 Build 156 04/24/2013 SJ Web Edition
+Revision Name : Compsys305-DMinus-Flappy-Grades
+Top-level Entity Name : Flappy-Grades
+Family : Cyclone III
+Total logic elements : 2,744
+    Total combinational functions : 2,631
+    Dedicated logic registers : 446
+Total registers : 446
+Total pins : 42
+Total virtual pins : 0
+Total memory bits : 30,720
+Embedded Multiplier 9-bit elements : 0
+Total PLLs : 1
