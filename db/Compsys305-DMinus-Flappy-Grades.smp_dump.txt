@@ -1,0 +1,18 @@
+
+State Machine - |Flappy-Grades|FSM_test:inst|state
+Name state.training state.lose state.win state.gameplay state.pause state.main_menu 
+state.main_menu 0 0 0 0 0 0 
+state.pause 0 0 0 0 1 1 
+state.gameplay 0 0 0 1 0 1 
+state.win 0 0 1 0 0 1 
+state.lose 0 1 0 0 0 1 
+state.training 1 0 0 0 0 1 
+
+State Machine - |Flappy-Grades|MOUSE:inst3|mouse_state
+Name mouse_state.INPUT_PACKETS mouse_state.WAIT_CMD_ACK mouse_state.WAIT_OUTPUT_READY mouse_state.LOAD_COMMAND2 mouse_state.LOAD_COMMAND mouse_state.INHIBIT_TRANS 
+mouse_state.INHIBIT_TRANS 0 0 0 0 0 0 
+mouse_state.LOAD_COMMAND 0 0 0 0 1 1 
+mouse_state.LOAD_COMMAND2 0 0 0 1 0 1 
+mouse_state.WAIT_OUTPUT_READY 0 0 1 0 0 1 
+mouse_state.WAIT_CMD_ACK 0 1 0 0 0 1 
+mouse_state.INPUT_PACKETS 1 0 0 0 0 1 
